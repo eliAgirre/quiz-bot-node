@@ -15,7 +15,9 @@
   "author": "Eli aguirre",
   "license": "ISC",
   "dependencies": {
+    "bristol": "^0.4.0",
     "dotenv": "^8.2.0",
-    "node-telegram-bot-api": "^0.30.0"
+    "node-telegram-bot-api": "^0.30.0",
+    "palin": "^2.3.0"
   }
 }

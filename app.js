@@ -1,6 +1,10 @@
 // requires
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
+const log = require('bristol');
+const palin = require('palin');
+log.addTarget('console').withFormatter(palin);
+log.info("We're up and running!", {port: 3000});
 
 // constantes
 const token = process.env.TOKEN;
@@ -26,6 +30,8 @@ var datos_score = [0,0];
 
 bot.onText(/\/start/, (msg) => {
     console.log("Comando start")
+    const log_info = `El comando start ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}`
+    log.info(log_info, { scope: 'start' });
     const cid = msg.chat.id
     let username = msg.from.username;
     let response = "Bienvenido "+username+".\nEste es un chat para practicar preguntas sobre la oposición de TAI.\nAprende constestando las preguntas y tienes la opción de ver youtube (@youtube) y de realizar las búsquedas en la wikipedia (@wiki)."
@@ -34,6 +40,8 @@ bot.onText(/\/start/, (msg) => {
 
 bot.onText(/\/help/, (msg) => {
     console.log("Comando help")
+    const log_info = `El comando help ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}`
+    log.info(log_info, { scope: 'help' });
     const cid = msg.chat.id
     let response = "Los siguientes comando están disponibles para este bot: \n" 
     for (key in commands) {  // generate help text out of the commands dictionary defined at the top 
@@ -44,6 +52,8 @@ bot.onText(/\/help/, (msg) => {
 
 bot.onText(/\/quiz/, (msg) => {
     console.log("Comando quiz")
+    const log_info = `El comando quiz ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}`
+    log.info(log_info, { scope: 'quiz' });
     const cid = msg.chat.id
     let bloque = ''
     let autor = ''
@@ -83,6 +93,8 @@ bot.on('callback_query', (callbackQuery) => {
     const msg = callbackQuery.message;
     const data = callbackQuery.data;
     const cid = msg.chat.id;
+    const log_info = `El callback_query ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}`
+    log.info(log_info, { scope: 'callback_query' });
     let response = ''
     user_answer = funciones.getRespuestaUser(data);
 
@@ -107,6 +119,8 @@ bot.on('callback_query', (callbackQuery) => {
 
 bot.onText(/\/stop/, (msg) => {
     console.log("Comando stop")
+    const log_info = `El comando stop ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}`
+    log.info(log_info, { scope: 'stop' });
     const cid = msg.chat.id
     let response = '';
     let contador = 0;
@@ -131,6 +145,8 @@ bot.onText(/\/stop/, (msg) => {
 
 bot.onText(/\/wiki/, (msg) => {
     console.log("Comando wiki")
+    const log_info = `El comando wiki ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}`
+    log.info(log_info, { scope: 'wiki' });
     const cid = msg.chat.id
     let response = ''
     let lang = 'es'
@@ -163,6 +179,8 @@ bot.onText(/\/wiki/, (msg) => {
 
 bot.on('message', (msg) => {
     console.log("Comando default")
+    const log_info = `El comando default ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}`
+    log.info(log_info, { scope: 'default' });
     const cid = msg.chat.id
     response = ''
 
