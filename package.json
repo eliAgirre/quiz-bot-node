@@ -1,0 +1,21 @@
+{
+  "name": "node-bot",
+  "version": "1.0.0",
+  "description": "Quiz Telegram Bot",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Telegram",
+    "Node.js",
+    "Javascript"
+  ],
+  "author": "Eli aguirre",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "node-telegram-bot-api": "^0.30.0"
+  }
+}
