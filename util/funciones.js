@@ -8,7 +8,7 @@ module.exports = {
 
     knownUsers: function(uid){
 
-      if( !validaciones.array_vacio(userStep)){
+      if( !validaciones.arrayVacio(userStep, "userStep")){
 
         for (i=0;i<userStep.length;i++) {
           if( uid == userStep[i] ){
@@ -27,15 +27,20 @@ module.exports = {
 
         var encontrado = false;
         var comandos = [];
+
         for (key in commands) {
             comandos.push("/"+key);
         }
-        for (i=0;i<comandos.length;i++) {
+
+        if( !validaciones.arrayVacio(comandos, "comandos")){
+          for (i=0;i<comandos.length;i++) {
             //console.log(comandos[i])
             if( text == comandos[i] ){
                 encontrado = true;
             }
+          }          
         }
+
         return encontrado;
         
     },
@@ -77,16 +82,70 @@ module.exports = {
 
       var fila = []
       var datos = []
-      for(i=0;i<array.length;i++){
-        fila = array[i].split(";;");
+
+      if( !validaciones.arrayVacio(array, "array")){
+
+        for(i=0;i<array.length;i++){
+          fila = array[i].split(";;");
+        }
       }
-      for(i=1;i<fila.length;i++){
-        datos[i-1] = fila[i].split(";",8);
+
+      if( !validaciones.arrayVacio(fila, "fila")){
+
+        for(i=1;i<fila.length;i++){
+          datos[i-1] = fila[i].split(";",8);
+        }
       }
       /*
-      for(i=1;i<datos.length;i++){
-        console.log(datos[i])
+      if( !validaciones.arrayVacio(datos, "datos")){
+        for(i=1;i<datos.length;i++){
+          console.log(datos[i])
+        }
       }*/
+      return datos;
+    },
+
+    getPreguntasPorBloque: function(array, bloque){
+
+      var fila = []
+      var datos = []
+      var x = 0;
+      let b = ""
+      
+      if ( bloque.length > 0){
+
+        if( !validaciones.arrayVacio(array, "array")){
+
+          for(i=0;i<array.length;i++){
+            fila = array[i].split(";;");
+          }
+        }
+  
+        console.log("bloque: "+bloque);
+
+        if( !validaciones.arrayVacio(fila, "fila")){
+
+          for(i=1;i<fila.length;i++){
+  
+            block = fila[i].split(";",1);
+            
+            for(j=0;j<block.length;j++){
+  
+              let b = block[j];
+              b = b.replace("\r\n", "");
+              b = b.trim();
+              //console.log("variable b: "+b);
+              if( bloque ==  b ){
+                //console.log(fila[i]);
+                datos[x] = fila[i].split(";",8);
+                x++;
+              }
+            }          
+          }
+        }
+
+      }
+
       return datos;
     },
 

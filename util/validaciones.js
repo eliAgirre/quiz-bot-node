@@ -1,6 +1,8 @@
 module.exports = {
 
-    array_vacio: function(array){
+    arrayVacio: function(array, nombreArray){
+
+        console.log("tam array "+nombreArray+" : "+array.length)
 
         if( array.length == 0) {
 

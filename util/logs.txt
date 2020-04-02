@@ -4,4 +4,381 @@ id: 541124032
 type: private
 username: eaguirre
 first_name: Elisa
+}El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+Error al cargar el array de preguntas por bloque.El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+Error al cargar el array de preguntas por bloque.El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+Error al cargar el array de preguntas por bloque.El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+Error al cargar el array de preguntas por bloque.El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+Error al cargar el array de preguntas por bloque.El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+Error al cargar el array de preguntas por bloque.El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+Error al cargar el array de preguntas por bloque.El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+Error al cargar el array de preguntas por bloque.El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quiz ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando quizb ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando bloque ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando bloque ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando test ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando test ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando test ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando default ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
+El comando test ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
 }
