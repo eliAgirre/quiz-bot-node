@@ -14,7 +14,8 @@ const bot = new TelegramBot(token, {polling: true});
 const funciones = require('./util/funciones.js');
 
 // constantes filenames
-const file_preguntas = "\\util\\preguntas.txt";
+const file_preguntas = "./util/preguntas.txt";
+const file_log       = "./util/logs.txt";
 
 // constantes listas
 const listas = require('./util/listas.js');
@@ -32,9 +33,18 @@ bot.onText(/\/start/, (msg) => {
     console.log("Comando start")
     const log_info = `El comando start ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}`
     log.info(log_info, { scope: 'start' });
+    funciones.writeFile(file_log, log_info);
     const cid = msg.chat.id
     let username = msg.from.username;
-    let response = "Bienvenido "+username+".\nEste es un chat para practicar preguntas sobre la oposición de TAI.\nAprende constestando las preguntas y tienes la opción de ver youtube (@youtube) y de realizar las búsquedas en la wikipedia (@wiki)."
+    let first_name = msg.chat.first_name;
+    let uid = funciones.knownUsers(msg.chat.id);
+    let response = "";
+    if( uid == 0){
+        response = "Bienvenido "+first_name+".\nEste es un chat para practicar preguntas sobre la oposición de TAI.\nAprende constestando las preguntas y tienes la opción de ver youtube (@youtube) y de realizar las búsquedas en la wikipedia (@wiki).\nPara ver los comandos de este puedes escribir /help."
+    }
+    else{
+        response = "Ya te conozco, eres "+first_name+".\nPara ver los comandos puedes escribir /help."
+    }    
     bot.sendMessage(cid, response);  
 });
 
@@ -105,8 +115,8 @@ bot.on('callback_query', (callbackQuery) => {
     else if( user_answer != ''){
 
         datos_score = funciones.calcularScore(datos_score, datos[1], user_answer);
-        response += "El enunciado ha sido: "+datos[0]+"\nTu respuesta ha sido la *"+user_answer+"*.\n*La respuesta correcta es: "+datos[1]+"*\n"
-        response += "Respuestas *correctas*: "+datos_score[0].toString()+".\nRespuestas *incorrectas*: "+datos_score[1].toString()+".\n";
+        response += "El enunciado ha sido: "+datos[0]+"\nTu respuesta ha sido la *"+user_answer+"*.\n*La respuesta correcta es: "+datos[1]+"*\n\n"
+        response += "Respuestas *correctas*: "+datos_score[0].toString()+".\nRespuestas *incorrectas*: "+datos_score[1].toString()+".\n\n";
         response += "Para empezar hacer el test puedes escribir el comando /quiz.\n"
         response += "Para parar el test puedes escribir el comando /stop."
 
@@ -136,7 +146,7 @@ bot.onText(/\/stop/, (msg) => {
         });
     }
     else{
-        response = "No hay puntuación, ya que no has respondido al test.\nPara empezar hacer el test puedes escribir el comando /quiz y después hacer clic en alguna de las opciones correspondientes."
+        response = "No hay puntuación, ya que no has respondido al test o ya habías terminado.\nPara empezar hacer el test puedes escribir el comando /quiz y después hacer clic en alguna de las opciones correspondientes."
         bot.sendMessage(cid, response);
     }
     

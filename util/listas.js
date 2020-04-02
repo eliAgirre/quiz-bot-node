@@ -8,7 +8,7 @@ module.exports = {
             'help'        : 'Esta instrucción informa sobre los comandos de este bot',
             'quiz'        : 'Empezar el test',
             'stop'        : 'Se para el test y te da un resumen de tu puntuación.',
-            'wiki'        : 'Busca información en la wikipedia.'
+            'wiki'        : 'Busca información en la wikipedia en castellano.'
         }
         
         return commands;

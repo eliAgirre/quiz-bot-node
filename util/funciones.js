@@ -1,7 +1,27 @@
 const listas = require('./listas.js');
+const validaciones = require('./validaciones.js');
 const commands = listas.listCommand();
+var knownUsers = [];
+var userStep = [];
 
 module.exports = {
+
+    knownUsers: function(uid){
+
+      if( !validaciones.array_vacio(userStep)){
+
+        for (i=0;i<userStep.length;i++) {
+          if( uid == userStep[i] ){
+            return userStep[i];
+          }
+          else{
+            knownUsers.push(uid);
+            return 0;
+          }
+        }
+      }
+
+    },
 
     findCommnad: function(text) {
 
@@ -23,12 +43,33 @@ module.exports = {
     readFile: function(filename){
 
       let fs = require('fs');
-      let path = process.cwd();
-      var content = fs.readFileSync(path + filename);
+      //let path = process.cwd();
+      //var content = fs.readFileSync(path + filename);
+      var content = fs.readFileSync(filename);
       var array = []
       //console.log(content.toString());
       array.push(content.toString())
       return array;
+
+    },
+
+    writeFile: function(filename, content){
+
+      let fs = require('fs');
+      var guardado = false;
+      //var content = fs.readFileSync(filename);
+      fs.appendFile(filename, content, function (err) {
+        if (err){
+          //throw err;
+          console.log(err);
+        }
+        else{
+          console.log('Saved!');
+          guardado = true;
+        }
+        
+      });
+      return guardado;
 
     },
 

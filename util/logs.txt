@@ -1,0 +1,7 @@
+El comando start ha recibido el dato del chat: 
+{
+id: 541124032
+type: private
+username: eaguirre
+first_name: Elisa
+}
