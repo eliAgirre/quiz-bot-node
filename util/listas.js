@@ -7,7 +7,10 @@ module.exports = {
             'start'       : 'Bienvenido al chatbot', 
             'help'        : 'Esta instrucción informa sobre los comandos de este bot',
             'quiz'        : 'Empezar el test',
-            'test'        : 'Empezar el test por bloques. Bloque 1, bloque 2, bloque 3 o bloque 4.',
+            'b1'          : 'Test bloque 1 - Legislacion.',
+            'b2'          : 'Test bloque 2 - Tecnología básica.',
+            'b3'          : 'Test bloque 3 - Programación.',
+            'b4'          : 'Test bloque 4 - Sistemas.',
             'stop'        : 'Se para el test y te da un resumen de tu puntuación.',
             'wiki'        : 'Busca información en la wikipedia en castellano.'
         }
