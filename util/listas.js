@@ -11,6 +11,11 @@ module.exports = {
             'b2'          : 'Test bloque 2 - Tecnología básica.',
             'b3'          : 'Test bloque 3 - Programación.',
             'b4'          : 'Test bloque 4 - Sistemas.',
+            '2014'        : 'Test 2014 INAP',
+            '2015'        : 'Test 2015 INAP',
+            '2016'        : 'Test 2016 INAP',
+            '2017'        : 'Test 2017 INAP',
+            '2018'        : 'Test 2018 INAP',
             'stop'        : 'Se para el test y te da un resumen de tu puntuación.',
             'wiki'        : 'Busca información en la wikipedia en castellano.'
         }
@@ -47,6 +52,28 @@ module.exports = {
                     }
 
         return keyboard;
+    },
+
+    arrayCommands: function(){
+
+        let array_commands = [  "/start",   //0
+                                "/help",    //1
+                                "/quiz",    //2
+                                "/b1",      //3
+                                "/b2",      //4
+                                "/b3",      //5
+                                "/b4",      //6
+                                "/2014",    //7
+                                "/2015",    //8
+                                "/2016",    //9
+                                "/2017",    //10
+                                "/2018",    //11
+                                "/stop",    //12
+                                "/wiki"     //13
+                            ];
+
+        return array_commands;
+
     }
 
 }

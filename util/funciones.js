@@ -1,5 +1,6 @@
 const listas = require('./listas.js');
 const validaciones = require('./validaciones.js');
+const model_pregunta = require('../model/Pregunta.js');
 const commands = listas.listCommand();
 var knownUsers = [];
 var userStep = [];
@@ -160,6 +161,24 @@ module.exports = {
       return a;
     },
 
+    replaceSpace: function(str, character){
+
+        var string = "";
+        var chart = "";
+        for(i=0; i < str.length; i++){  // fixed spelling from 'str.lenght'
+            if (str.charAt(i) == " ") {
+                chart = character;
+                string = string + chart;
+            }
+            else {
+                chart = str.charAt(i);
+                string = string + chart;
+            }
+        }
+        return string
+
+    },
+
     getRespuestaUser: function(data){
 
       const OPCION_A = 'a'
@@ -201,6 +220,39 @@ module.exports = {
       }
       
       return datos_score;
+
+    },
+
+    getDatosPregunta: function(array){
+
+      let bloque = ''
+      let autor = ''
+      let enunciado = ''
+      let opcion_a = ''
+      let opcion_b = ''
+      let opcion_c = ''
+      let opcion_d = ''
+      let resp_correcta = ''
+      let datos_pregunta;
+
+      if( !validaciones.arrayVacio(array, "arrayGetDatosPregunta") ){
+
+        for(i=0;i<array.length;i++){
+          //console.log(array[i]);
+          bloque = array[i].bloque;
+          autor = array[i].autor;
+          enunciado = array[i].enunciado;
+          opcion_a = array[i].opcion_a;
+          opcion_b = array[i].opcion_b;
+          opcion_c = array[i].opcion_c;
+          opcion_d = array[i].opcion_d;
+          resp_correcta = array[i].resp_correcta;
+        }
+
+        datos_pregunta = new model_pregunta(bloque, autor,  enunciado, opcion_a, opcion_b, opcion_c, opcion_d, resp_correcta);
+      }
+
+      return datos_pregunta;
 
     }
     

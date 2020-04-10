@@ -14,7 +14,7 @@ const bot = new TelegramBot(token, {polling: true});
 
 // database
 const clientMongo = require('./database/config.js');
-clientMongo.connectToServer( function( err, client ) {
+clientMongo.connectToServer( function( err ) {
     if (err){
         console.log(err);
     }
@@ -33,48 +33,60 @@ const funciones = require('./util/funciones.js');
 const validaciones = require('./util/validaciones.js');
 
 // constantes filenames
-const file_preguntas = "./util/preguntas.txt";
+//const file_preguntas = "./util/preguntas.txt";
 const file_log       = "./util/logs.txt";
 
-// constantes listas
+// constantes listas/arrays
 const listas = require('./util/listas.js');
 const commands = listas.listCommand();
 const keyboard = listas.getKeyboard();
+const command = listas.arrayCommands();
+
+// otros constantes
+const coleccion_preguntas="preguntas";
+const markdown = "Markdown";
+const error_cargar_array = "Error al cargar el array de preguntas por";
+const error_no_bien_elegido = "No se ha elegido bien.\nPara ello debe escribir el comando.\nEjemplo: ";
+const error_cambio_comando = "Para cambiar debes escribir el comando "+command[12]+" y después el comando correspondiente al";
 
 // variables
 //var array = funciones.readFile(file_preguntas);
 //var preguntas = funciones.getPreguntas(array);
 var datos = [] // enunciado y resp_correcta
+var preguntasBloque = [];
+var preguntasAnio = [];
 var user_answer = '';
 var datos_score = [0,0];
 var accion = '';
 var bloque_anterior = '';
-
+var anio_anterior = '';
+var accion_anterior = '';
 
 // comandos
 bot.onText(/^\/start/, (msg) => {
-    console.log("Comando start")
-    const log_info = `El comando start ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
-    log.info(log_info, { scope: 'start' });
+    console.log("Comando "+command[0])
+    const log_info = `El comando `+command[0]+` ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
+    log.info(log_info, { scope: command[0] });
     funciones.writeFile(file_log, log_info);
     const cid = msg.chat.id
-    let username = msg.from.username;
+    //let username = msg.from.username;
     let first_name = msg.chat.first_name;
     let uid = funciones.knownUsers(msg.chat.id);
     let response = "";
     if( uid == 0){
-        response = "Bienvenido "+first_name+".\nEste es un chat para practicar preguntas sobre la oposición de TAI.\nAprende constestando las preguntas y tienes la opción de ver youtube (@youtube) y de realizar las búsquedas en la wikipedia (@wiki).\nPara ver los comandos de este puedes escribir /help."
+        response = "Bienvenido "+first_name+".\nEste es un chat para practicar preguntas sobre la oposición de TAI.\nAprende constestando las preguntas y tienes la opción de ver youtube (@youtube) y de realizar las búsquedas en la wikipedia (@wiki).\nPara ver los comandos de este puedes escribir "+command[1]+"."
     }
     else{
-        response = "Ya te conozco, eres "+first_name+".\nPara ver los comandos puedes escribir /help."
+        response = "Ya te conozco, eres "+first_name+".\nPara ver los comandos puedes escribir "+command[1]+"."
     }    
     bot.sendMessage(cid, response);  
 });
 
+// help
 bot.onText(/^\/help/, (msg) => {
-    console.log("Comando help")
-    const log_info = `El comando help ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
-    log.info(log_info, { scope: 'help' });
+    console.log("Comando "+command[1])
+    const log_info = `El comando `+command[1]+` ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
+    log.info(log_info, { scope: command[1] });
     funciones.writeFile(file_log, log_info);
     const cid = msg.chat.id
     let response = "Los siguientes comando están disponibles para este bot: \n" 
@@ -84,61 +96,49 @@ bot.onText(/^\/help/, (msg) => {
     bot.sendMessage(cid, response);  
 });
 
+// quiz
 bot.onText(/^\/quiz/, (msg) => {
-    console.log("Comando quiz")
-    const log_info = `El comando quiz ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
-    log.info(log_info, { scope: 'quiz' });
+    console.log("Comando "+command[2])
+    const log_info = `El comando `+command[2]+` ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
+    log.info(log_info, { scope: command[2] });
     funciones.writeFile(file_log, log_info);
-    accion = "/quiz";
+    accion = command[2];
     const cid = msg.chat.id
-    let bloque = ''
-    let autor = ''
-    let enunciado = ''
-    let opcion_a = ''
-    let opcion_b = ''
-    let opcion_c = ''
-    let opcion_d = ''
-    let resp_correcta = ''
     var db_questions = [];
-    var db = clientMongo.getDb();   
-    db.collection('preguntas').find().toArray((err, results) => {
-        if (err){
-             return console.log(err)
-        }       
-        results.forEach(function(obj) {
-            //console.log("obj: "+ JSON.stringify(obj));
-            let preg = new model_pregunta(obj.bloque, obj.autor,  obj.enunciado, obj.opcion_a, obj.opcion_b, obj.opcion_c, obj.opcion_d, obj.resp_correcta);
-            db_questions.push(preg);
+    var db = clientMongo.getDb();
+
+    if (accion_anterior == '' | accion == accion_anterior){
+        accion_anterior = accion;
+        db.collection(coleccion_preguntas).find().toArray((err, results) => {
+            if (err){
+                 return console.log(err)
+            }       
+            results.forEach(function(obj) {
+                //console.log("obj: "+ JSON.stringify(obj));
+                let preg = new model_pregunta(obj.bloque, obj.autor,  obj.enunciado, obj.opcion_a, obj.opcion_b, obj.opcion_c, obj.opcion_d, obj.resp_correcta);
+                db_questions.push(preg);
+            });
+    
+            db_questions = funciones.shuffle(db_questions);
+            let m_datos = funciones.getDatosPregunta(db_questions);
+            //console.log(m_datos);
+            response = "* "+m_datos.bloque+")* "+m_datos.enunciado+"\n "+m_datos.opcion_a+" \n "+m_datos.opcion_b+" \n "+m_datos.opcion_c+" \n "+m_datos.opcion_d+" \n\n De *"+m_datos.autor+"*"
+            datos[0] = m_datos.enunciado;
+            datos[1] = m_datos.resp_correcta;
+    
+            bot.sendMessage(cid, response, { parse_mode: markdown, reply_markup: keyboard }).then(() => { 
+                //console.log("response: "+response);
+                console.log("datos: \nenunciado: "+datos[0]+"\n resp_correcta: "+datos[1]);
+            });
         });
-
-        db_questions = funciones.shuffle(db_questions);
-
-        for(i=1;i<db_questions.length;i++){
-            //console.log(db_questions[i]);
-            bloque = db_questions[i].bloque;
-            autor = db_questions[i].autor;
-            enunciado = db_questions[i].enunciado;
-            opcion_a = db_questions[i].opcion_a;
-            opcion_b = db_questions[i].opcion_b;
-            opcion_c = db_questions[i].opcion_c;
-            opcion_d = db_questions[i].opcion_d;
-            resp_correcta = db_questions[i].resp_correcta;
-        }
-    
-        response = "* "+bloque+")* "+enunciado+"\n "+opcion_a+" \n "+opcion_b+" \n "+opcion_c+" \n "+opcion_d+" \n\n De *"+autor+"*"
-    
-        datos[0] = enunciado;
-        datos[1] = resp_correcta;
-    
-        bot.sendMessage(cid, response, { parse_mode: "Markdown", reply_markup: keyboard }).then(() => { 
-            //console.log("response: "+response);
-            console.log("datos: \nenunciado: "+datos[0]+"\n resp_correcta: "+datos[1]);
-        });
-
-    });
-
+    }
+    else{
+        response = error_cambio_comando+" año o al bloque o sino al quiz."
+        bot.sendMessage(cid, response);
+    }
 });
 
+// test por bloque
 bot.onText(/^\/b1|^\/b2|^\/b3|^\/b4/, (msg) => {
     let comando = msg.text.toString();
     console.log("comando "+comando);
@@ -149,87 +149,152 @@ bot.onText(/^\/b1|^\/b2|^\/b3|^\/b4/, (msg) => {
     const bloque_elegido = comando.substring(1, comando.length);
     accion = comando;
     let bloque = ''
-    let autor = ''
-    let enunciado = ''
-    let opcion_a = ''
-    let opcion_b = ''
-    let opcion_c = ''
-    let opcion_d = ''
-    let resp_correcta = ''
     var db = clientMongo.getDb();
-    var preguntasBloque = [];
 
-    if (bloque_anterior == '' | bloque_elegido == bloque_anterior){
+    if (accion_anterior == '' | accion == accion_anterior){
+        accion_anterior = accion;
 
-        if (bloque_elegido.toLowerCase() == "b1" || bloque_elegido.toLowerCase() == "b2" || bloque_elegido.toLowerCase() == "b3" || bloque_elegido.toLowerCase() == "b4"){
+        if (bloque_anterior == '' | bloque_elegido == bloque_anterior){
 
-            bloque_anterior = bloque_elegido;
-            bloque = bloque_elegido.toUpperCase();
+            if (bloque_elegido.toLowerCase() == command[3].substring(1,command[3].length ) //b1
+                || bloque_elegido.toLowerCase() == command[4].substring(1,command[4].length ) //b2
+                || bloque_elegido.toLowerCase() == command[5].substring(1,command[5].length ) //b3
+                || bloque_elegido.toLowerCase() == command[6].substring(1,command[6].length ) ){ //b4
 
-            db.collection('preguntas').find({"bloque":bloque}).toArray((err, results) => {
+                bloque_anterior = bloque_elegido;
+                bloque = bloque_elegido.toUpperCase();
+                db.collection(coleccion_preguntas).find({ "bloque" : bloque }).toArray((err, results) => {
 
-                if (err){
-                    return console.log(err)
-                }
-                
-                results.forEach(function(obj) {
-                    //console.log("obj: "+ JSON.stringify(obj));
-                    let preg = new model_pregunta(obj.bloque, obj.autor,  obj.enunciado, obj.opcion_a, obj.opcion_b, obj.opcion_c, obj.opcion_d, obj.resp_correcta);
-                    preguntasBloque.push(preg);
+                    if (err)
+                        return console.log(err)
+                    
+                    results.forEach(function(obj) {
+                        //console.log("obj: "+ JSON.stringify(obj));
+                        let preg = new model_pregunta(obj.bloque, obj.autor,  obj.enunciado, obj.opcion_a, obj.opcion_b, obj.opcion_c, obj.opcion_d, obj.resp_correcta);
+                        preguntasBloque.push(preg);
+
+                    });
+                    //preguntasBloque = funciones.getPreguntasPorBloque(array, bloque);
+                    if( !validaciones.arrayVacio(preguntasBloque, "preguntasBloque") ){
+            
+                        preguntasBloque = funciones.shuffle(preguntasBloque);
+                        let m_datos = funciones.getDatosPregunta(preguntasBloque);
+                        //console.log(m_datos);
+                        response = "* "+m_datos.bloque+")* "+m_datos.enunciado+"\n "+m_datos.opcion_a+" \n "+m_datos.opcion_b+" \n "+m_datos.opcion_c+" \n "+m_datos.opcion_d+" \n\n De *"+m_datos.autor+"*"
+                        datos[0] = m_datos.enunciado;
+                        datos[1] = m_datos.resp_correcta;
+                    
+                        bot.sendMessage(cid, response, { parse_mode: markdown, reply_markup: keyboard }).then(() => { 
+                            //console.log("response: "+response);
+                            console.log("datos: \nenunciado: "+datos[0]+"\n resp_correcta: "+datos[1]);
+                        });
+                        
+                    }
+                    else{
+                        const log_error = error_cargar_array+" bloque."
+                        log.error(log_error, { scope: comando })
+                        funciones.writeFile(file_log, log_error);
+                    }
+                });
+            }
+            else {
+                response = error_no_bien_elegido+command[3]
+                bot.sendMessage(cid, response);
+            }
+        }
+        else {
+            response = error_cambio_comando+" bloque."
+            bot.sendMessage(cid, response);
+        }
+    }    
+    else {
+        response = error_cambio_comando+" año o al bloque o sino al quiz."
+        bot.sendMessage(cid, response);
+    }
+});
+
+// test por año
+bot.onText(/^\/2014|^\/2015|^\/2016|^\/2017|^\/2018/, (msg) => {
+    let comando = msg.text.toString();
+    console.log("comando "+comando);
+    const log_info = `El comando `+comando+` ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
+    log.info(log_info, { scope: comando });
+    funciones.writeFile(file_log, log_info);
+    const cid = msg.chat.id
+    const anio_elegido = comando.substring(1, comando.length);
+    accion = comando;
+    var db = clientMongo.getDb();
+
+    if (accion_anterior == '' | accion == accion_anterior){
+        accion_anterior = accion;
+
+        if ( anio_anterior == '' | anio_elegido == anio_anterior){
+
+            console.log("año elegido: "+anio_elegido);
+
+            if ( anio_elegido == command[7].substring(1,command[7].length ) //2014
+                || anio_elegido == command[8].substring(1,command[8].length ) //2015
+                || anio_elegido == command[9].substring(1,command[9].length ) //2016
+                || anio_elegido == command[10].substring(1,command[10].length ) //2017
+                || anio_elegido == command[11].substring(1,command[11].length ) ){ //2018
+
+                anio_anterior = anio_elegido;
+                let autorLI1 = "TAI-LI-"+anio_elegido+"-1";
+                //let autorLI2 = "TAI-LI-"+anio_elegido+"-2";
+                let autorPI1 = "TAI-PI-"+anio_elegido+"-1";
+                //let autorPI2 = "TAI-PI-"+anio_elegido+"-2";
+
+                db.collection(coleccion_preguntas).find({$or:[{ "autor" : autorLI1 },{ "autor" : autorPI1 } ]}).toArray((err, results) => {
+
+                    if (err)
+                        return console.log(err)
+                    
+                    results.forEach(function(obj) {
+                        //console.log("obj: "+ JSON.stringify(obj));
+                        let preg = new model_pregunta(obj.bloque, obj.autor,  obj.enunciado, obj.opcion_a, obj.opcion_b, obj.opcion_c, obj.opcion_d, obj.resp_correcta);
+                        //preg.showPregunta();
+                        preguntasAnio.push(preg);
+                    });
 
                 });
 
-                //preguntasBloque = funciones.getPreguntasPorBloque(array, bloque); 
-        
-                if( !validaciones.arrayVacio(preguntasBloque, "preguntasBloque") ){
-        
-                    preguntasBloque = funciones.shuffle(preguntasBloque);
-        
-                    for(i=0;i<preguntasBloque.length;i++){
-                        //console.log(preguntasBloque[i]);
-                        bloque = preguntasBloque[i].bloque;
-                        autor = preguntasBloque[i].autor;
-                        enunciado = preguntasBloque[i].enunciado;
-                        opcion_a = preguntasBloque[i].opcion_a;
-                        opcion_b = preguntasBloque[i].opcion_b;
-                        opcion_c = preguntasBloque[i].opcion_c;
-                        opcion_d = preguntasBloque[i].opcion_d;
-                        resp_correcta = preguntasBloque[i].resp_correcta;
-                    }
+                if( !validaciones.arrayVacio(preguntasAnio, "preguntasAnio") ){
+            
+                    preguntasAnio = funciones.shuffle(preguntasAnio);
+                    let m_datos = funciones.getDatosPregunta(preguntasAnio);
+                    //console.log(m_datos);
+                    response = "* "+m_datos.bloque+")* "+m_datos.enunciado+"\n "+m_datos.opcion_a+" \n "+m_datos.opcion_b+" \n "+m_datos.opcion_c+" \n "+m_datos.opcion_d+" \n\n De *"+m_datos.autor+"*"
+                    datos[0] = m_datos.enunciado;
+                    datos[1] = m_datos.resp_correcta;
                 
-                    response = "* "+bloque+")* "+enunciado+"\n "+opcion_a+" \n "+opcion_b+" \n "+opcion_c+" \n "+opcion_d+" \n\n De *"+autor+"*"
-                    
-                    datos[0] = enunciado;
-                    datos[1] = resp_correcta;
-                
-                    bot.sendMessage(cid, response, { parse_mode: "Markdown", reply_markup: keyboard }).then(() => { 
+                    bot.sendMessage(cid, response, { parse_mode: markdown, reply_markup: keyboard }).then(() => { 
                         //console.log("response: "+response);
                         console.log("datos: \nenunciado: "+datos[0]+"\n resp_correcta: "+datos[1]);
-                    });
-                    
+                    });   
                 }
                 else{
-                    const log_error = "Error al cargar el array de preguntas por bloque.";
+                    const log_error = error_cargar_array+" año."
                     log.error(log_error, { scope: comando })
                     funciones.writeFile(file_log, log_error);
                 }
-
-            });
+            }
+            else{
+                response = error_no_bien_elegido+command[8]
+                bot.sendMessage(cid, response);
+            }
         }
-        else {
-            response = "No se ha elegido bien el bloque.\nPara ello debe escribir el comando /bloque.\nEjemplo: /b1"
+        else{
+            response = error_cambio_comando+" año."
             bot.sendMessage(cid, response);
         }
     }
     else {
-        response = "Para cambiar de bloque debes escribir el comando /stop y después el comando correspondiente al bloque."
+        response = error_cambio_comando+" año o al bloque o sino al quiz."
         bot.sendMessage(cid, response);
     }
-    
-
 });
 
-// Listener (handler) for callback data from /quiz command
+// Listener (handler) for callback data from /quiz or /b1 or /2015 command
 bot.on('callback_query', (callbackQuery) => {
     console.log("callback_query");
     const msg = callbackQuery.message;
@@ -252,22 +317,23 @@ bot.on('callback_query', (callbackQuery) => {
         response += "Respuestas *correctas*: "+datos_score[0].toString()+".\nRespuestas *incorrectas*: "+datos_score[1].toString()+".\n\n";
         console.log("accion: "+accion);
         if( accion === ''){
-            accion = "/quiz o /b1 o /b2 o /b3 o /b4";
+            accion = command[2]+" o "+command[3]+" o "+command[4]+" o "+command[5]+" o "+command[6]+" o "+command[8];
         }
         response += "Para empezar o seguir el test puedes escribir el comando "+accion+".\n"
-        response += "Para parar el test puedes escribir el comando /stop."
+        response += "Para parar el test puedes escribir el comando "+command[12]+"."
 
-        bot.sendMessage(cid, response, { parse_mode: "Markdown" }).then(() => { 
+        bot.sendMessage(cid, response, { parse_mode: markdown }).then(() => { 
             console.log("response: "+response);
             user_answer = '';
         });
     }
 });
 
+// stop
 bot.onText(/^\/stop/, (msg) => {
-    console.log("Comando stop")
-    const log_info = `El comando stop ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
-    log.info(log_info, { scope: 'stop' });
+    console.log("Comando "+command[12])
+    const log_info = `El comando `+command[12]+` ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
+    log.info(log_info, { scope: command[12] });
     funciones.writeFile(file_log, log_info);
     const cid = msg.chat.id
     let response = '';
@@ -275,34 +341,46 @@ bot.onText(/^\/stop/, (msg) => {
 
     if( datos_score[0] > 0 || datos_score[1] > 0 ){
         contador = datos_score[0]+datos_score[1];
-        if (accion == '/b1' | accion == '/b2' | accion == '/b3' | accion == '/b4'  ){
+        if (  accion == command[3] //b1
+            | accion == command[4] //b2
+            | accion == command[5] //b3
+            | accion == command[6]  ){ //b4
+
             let b = accion.substring(accion.length-1);
             response = "De las *"+contador.toString()+"* preguntas del *bloque "+b+"*.\nRespuestas *correctas* : "+datos_score[0].toString()+".\nRespuestas *incorrectas*: "+datos_score[1].toString()+".\n"
+        }
+        else if ( accion == command[7] //2014
+                | accion == command[8] //2015
+                | accion == command[9] //2016
+                | accion == command[10] //2017
+                | accion == command[11] ){ //2018
+            let anio = accion.substring(1,accion.length);
+            response = "De las *"+contador.toString()+"* preguntas del *año "+anio+"*.\nRespuestas *correctas* : "+datos_score[0].toString()+".\nRespuestas *incorrectas*: "+datos_score[1].toString()+".\n"
         }
         else{
             response = "De las *"+contador.toString()+"* preguntas.\nRespuestas *correctas* : "+datos_score[0].toString()+".\nRespuestas *incorrectas*: "+datos_score[1].toString()+".\n"
         }
-        bot.sendMessage(cid, response, { parse_mode: "Markdown" }).then(() => { 
+        bot.sendMessage(cid, response, { parse_mode: markdown }).then(() => { 
             console.log("response: "+response);
             contador = 0;
             datos_score = [0,0];
             datos = ['',''];
             user_answer = '';
+            accion_anterior = '';
         });
     }
     else{
-        accion = "/quiz o /b1 o /b2 o /b3 o /b4";
+        accion = command[2]+" o "+command[3]+" o "+command[4]+" o "+command[5]+" o "+command[6]+" o "+command[8];
         response = "No hay puntuación, ya que no has respondido al test o ya habías terminado.\nPara empezar hacer el test puedes escribir el comando "+accion+" y después hacer clic en alguna de las opciones correspondientes."
         bot.sendMessage(cid, response);
     }
-    
 });
 
 // Matches /wiki [whatever]
 bot.onText(/^\/wiki (.+)/, function onWikiText(msg, match) {
-    console.log("Comando wiki")
-    const log_info = `El comando wiki ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
-    log.info(log_info, { scope: 'wiki' });
+    console.log("Comando "+command[13])
+    const log_info = `El comando `+command[13]+` ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
+    log.info(log_info, { scope: command[13] });
     funciones.writeFile(file_log, log_info);
     const cid = msg.chat.id
     let search = match[1];
@@ -310,18 +388,17 @@ bot.onText(/^\/wiki (.+)/, function onWikiText(msg, match) {
     let lang = 'es'
 
     if( search.length > 0 ){
-
         search = search.trim();
-        search = search.replace(" ", "_");
+        search = funciones.replaceSpace(search,"_");
         console.log("search: "+search);
         response = "https://"+lang+".wikipedia.org/wiki/"+search
         bot.sendMessage(cid, response, { parse_mode: "HTML" }).then(() => { 
             console.log("response: "+response);
         });
-    }
-    
+    } 
 });
 
+// command default
 bot.on('message', (msg) =>  {
     console.log("Comando default")
     const log_info = `El comando default ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
@@ -342,20 +419,19 @@ bot.on('message', (msg) =>  {
 
     if ( !funciones.findCommnad(comando) ){ // si no es ningun comando
         
-        response = "No te entiendo \"" +texto+ "\"\nPuedes escribir el comando /help para saber qué comando utilizar."
+        response = "No te entiendo \"" +texto+ "\"\nPuedes escribir el comando "+command[1]+" para saber qué comando utilizar."
         bot.sendMessage(cid, response);
     }
     else{
 
         if ( funciones.findCommnad(comando) ){ // si es el comando wiki
 
-            if( comando === "/wiki"){
+            if( comando === command[13] ){
                 if (search.length === 0){
-                    response = "No has puesto nada después de /wiki para buscarlo."
+                    response = "No has puesto nada después de "+command[13]+" para buscarlo."
                     bot.sendMessage(cid, response);
                 }
             }
         }
     }
-    
 });
