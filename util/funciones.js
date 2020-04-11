@@ -161,6 +161,16 @@ module.exports = {
       return a;
     },
 
+    formatDate: function(date) {
+
+      var fecha = date.toString();
+      var year = fecha.substring(0,4);
+      var month = fecha.substring(5,7);
+      var day = fecha.substring(8, 10);
+      return day+"-"+month+"-"+year;
+
+    },
+
     replaceSpace: function(str, character){
 
         var string = "";

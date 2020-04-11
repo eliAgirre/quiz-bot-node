@@ -3,6 +3,7 @@ require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const log = require('bristol');
 const palin = require('palin');
+const mongo = require('mongodb');
 
 // logs
 log.addTarget('console').withFormatter(palin);
@@ -44,6 +45,7 @@ const command = listas.arrayCommands();
 
 // otros constantes
 const coleccion_preguntas="preguntas";
+const coleccion_resp_users="respuestas_user";
 const markdown = "Markdown";
 const error_cargar_array = "Error al cargar el array de preguntas por";
 const error_no_bien_elegido = "No se ha elegido bien.\nPara ello debe escribir el comando.\nEjemplo: ";
@@ -55,6 +57,7 @@ const error_cambio_comando = "Para cambiar debes escribir el comando "+command[1
 var datos = [] // enunciado y resp_correcta
 var preguntasBloque = [];
 var preguntasAnio = [];
+var preg = [];
 var user_answer = '';
 var datos_score = [0,0];
 var accion = '';
@@ -111,7 +114,9 @@ bot.onText(/^\/quiz/, (msg) => {
         accion_anterior = accion;
         db.collection(coleccion_preguntas).find().toArray((err, results) => {
             if (err){
-                 return console.log(err)
+                log.error(err, { scope: 'find '+coleccion_preguntas});
+                console.log(err)
+                funciones.writeFile(file_log, err+" in find "+coleccion_preguntas);
             }       
             results.forEach(function(obj) {
                 //console.log("obj: "+ JSON.stringify(obj));
@@ -165,8 +170,11 @@ bot.onText(/^\/b1|^\/b2|^\/b3|^\/b4/, (msg) => {
                 bloque = bloque_elegido.toUpperCase();
                 db.collection(coleccion_preguntas).find({ "bloque" : bloque }).toArray((err, results) => {
 
-                    if (err)
-                        return console.log(err)
+                    if (err){
+                        log.error(err, { scope: 'find bloque'+coleccion_preguntas});
+                        console.log(err)
+                        funciones.writeFile(file_log, err+" in find bloque "+coleccion_preguntas);
+                    }
                     
                     results.forEach(function(obj) {
                         //console.log("obj: "+ JSON.stringify(obj));
@@ -246,9 +254,12 @@ bot.onText(/^\/2014|^\/2015|^\/2016|^\/2017|^\/2018/, (msg) => {
 
                 db.collection(coleccion_preguntas).find({$or:[{ "autor" : autorLI1 },{ "autor" : autorPI1 } ]}).toArray((err, results) => {
 
-                    if (err)
-                        return console.log(err)
-                    
+                    if (err){
+                        log.error(err, { scope: 'find autor '+autorLI1+" "+autorPI1+" "+coleccion_preguntas});
+                        console.log(err)
+                        funciones.writeFile(file_log, err+" in find autor "+autorLI1+" "+autorPI1+" "+coleccion_preguntas);
+                    }
+
                     results.forEach(function(obj) {
                         //console.log("obj: "+ JSON.stringify(obj));
                         let preg = new model_pregunta(obj.bloque, obj.autor,  obj.enunciado, obj.opcion_a, obj.opcion_b, obj.opcion_c, obj.opcion_d, obj.resp_correcta);
@@ -266,6 +277,8 @@ bot.onText(/^\/2014|^\/2015|^\/2016|^\/2017|^\/2018/, (msg) => {
                     response = "* "+m_datos.bloque+")* "+m_datos.enunciado+"\n "+m_datos.opcion_a+" \n "+m_datos.opcion_b+" \n "+m_datos.opcion_c+" \n "+m_datos.opcion_d+" \n\n De *"+m_datos.autor+"*"
                     datos[0] = m_datos.enunciado;
                     datos[1] = m_datos.resp_correcta;
+                    preg[0] = m_datos.bloque;
+                    preg[1] = m_datos.autor;
                 
                     bot.sendMessage(cid, response, { parse_mode: markdown, reply_markup: keyboard }).then(() => { 
                         //console.log("response: "+response);
@@ -305,6 +318,7 @@ bot.on('callback_query', (callbackQuery) => {
     funciones.writeFile(file_log, log_info);
     let response = ''
     user_answer = funciones.getRespuestaUser(data);
+    var db = clientMongo.getDb();
 
     if( user_answer == ''){
         response = "No has respondido a la pregunta";
@@ -322,9 +336,37 @@ bot.on('callback_query', (callbackQuery) => {
         response += "Para empezar o seguir el test puedes escribir el comando "+accion+".\n"
         response += "Para parar el test puedes escribir el comando "+command[12]+"."
 
+        var today = new Date().toLocaleDateString("es-ES", {  
+            day : '2-digit',
+            month : '2-digit',
+            year : 'numeric'
+        })
+        var hoy = funciones.formatDate(today);
+        var time = new Date().toLocaleTimeString("es-ES", {  
+            hour: '2-digit',
+            minute:'2-digit'
+        })
+
+        var ObjectID = mongo.ObjectID;
+        let doc = { "_id": new ObjectID(), "user": msg.chat.username, "accion": accion, "bloque": preg[0], "autor": preg[1], "enunciado": datos[0], "resp_correcta": datos[1], "resp_user": data, "fecha": hoy+" "+time.toString()  };
+        //console.log("doc: "+ JSON.stringify(doc));
+
         bot.sendMessage(cid, response, { parse_mode: markdown }).then(() => { 
             console.log("response: "+response);
             user_answer = '';
+            db.collection(coleccion_resp_users).insertOne(doc, (err, result) => {
+                if(err){
+                    console.log(err);
+                    log.error(err, { scope: 'insertOne '+coleccion_resp_users});
+                    funciones.writeFile(file_log, err+" in inserOne "+coleccion_resp_users);
+                }
+                else{
+                    const log_msg="Document inserted";
+                    console.log(log_msg);
+                    log.info(log_msg, { scope: 'insertOne '+coleccion_resp_users});
+                    funciones.writeFile(file_log, log_msg);
+                }
+            })
         });
     }
 });
