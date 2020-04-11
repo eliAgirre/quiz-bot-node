@@ -5,13 +5,19 @@ const log = require('bristol');
 const palin = require('palin');
 const mongo = require('mongodb');
 
-// logs
+// log
 log.addTarget('console').withFormatter(palin);
 log.info("We're up and running!", {port: 3000});
 
 // constantes
 const token = process.env.TOKEN;
-const bot = new TelegramBot(token, {polling: true});
+//const bot = new TelegramBot(token, {polling: true});
+port = process.env.PORT || 443,
+host = '0.0.0.0',  // probably this change is not required
+externalUrl = process.env.CUSTOM_ENV_VARIABLE,
+token,
+bot = new TelegramBot(process.env.TOKEN, { webHook: { port : port, host : host } });
+bot.setWebHook(externalUrl + ':443/bot' + token);
 
 // database
 const clientMongo = require('./database/config.js');
@@ -117,7 +123,7 @@ bot.onText(/^\/quiz/, (msg) => {
                 log.error(err, { scope: 'find '+coleccion_preguntas});
                 console.log(err)
                 funciones.writeFile(file_log, err+" in find "+coleccion_preguntas);
-            }       
+            }      
             results.forEach(function(obj) {
                 //console.log("obj: "+ JSON.stringify(obj));
                 let preg = new model_pregunta(obj.bloque, obj.autor,  obj.enunciado, obj.opcion_a, obj.opcion_b, obj.opcion_c, obj.opcion_d, obj.resp_correcta);
@@ -130,6 +136,8 @@ bot.onText(/^\/quiz/, (msg) => {
             response = "* "+m_datos.bloque+")* "+m_datos.enunciado+"\n "+m_datos.opcion_a+" \n "+m_datos.opcion_b+" \n "+m_datos.opcion_c+" \n "+m_datos.opcion_d+" \n\n De *"+m_datos.autor+"*"
             datos[0] = m_datos.enunciado;
             datos[1] = m_datos.resp_correcta;
+            preg[0] = m_datos.bloque;
+            preg[1] = m_datos.autor;
     
             bot.sendMessage(cid, response, { parse_mode: markdown, reply_markup: keyboard }).then(() => { 
                 //console.log("response: "+response);
@@ -191,6 +199,8 @@ bot.onText(/^\/b1|^\/b2|^\/b3|^\/b4/, (msg) => {
                         response = "* "+m_datos.bloque+")* "+m_datos.enunciado+"\n "+m_datos.opcion_a+" \n "+m_datos.opcion_b+" \n "+m_datos.opcion_c+" \n "+m_datos.opcion_d+" \n\n De *"+m_datos.autor+"*"
                         datos[0] = m_datos.enunciado;
                         datos[1] = m_datos.resp_correcta;
+                        preg[0] = m_datos.bloque;
+                        preg[1] = m_datos.autor;
                     
                         bot.sendMessage(cid, response, { parse_mode: markdown, reply_markup: keyboard }).then(() => { 
                             //console.log("response: "+response);
@@ -259,7 +269,7 @@ bot.onText(/^\/2014|^\/2015|^\/2016|^\/2017|^\/2018/, (msg) => {
                         console.log(err)
                         funciones.writeFile(file_log, err+" in find autor "+autorLI1+" "+autorPI1+" "+coleccion_preguntas);
                     }
-
+                    
                     results.forEach(function(obj) {
                         //console.log("obj: "+ JSON.stringify(obj));
                         let preg = new model_pregunta(obj.bloque, obj.autor,  obj.enunciado, obj.opcion_a, obj.opcion_b, obj.opcion_c, obj.opcion_d, obj.resp_correcta);
@@ -316,6 +326,7 @@ bot.on('callback_query', (callbackQuery) => {
     const log_info = `El callback_query ha recibido el dato del chat: \n{\nid: ${msg.chat.id}\ntype: ${msg.chat.type}\nusername: ${msg.chat.username}\nfirst_name: ${msg.chat.first_name}\n}\n`
     log.info(log_info, { scope: 'callback_query' });
     funciones.writeFile(file_log, log_info);
+    let tipo_respuesta = ''
     let response = ''
     user_answer = funciones.getRespuestaUser(data);
     var db = clientMongo.getDb();
@@ -327,6 +338,7 @@ bot.on('callback_query', (callbackQuery) => {
     else if( user_answer != ''){
 
         datos_score = funciones.calcularScore(datos_score, datos[1], user_answer);
+        tipo_respuesta = funciones.tipoRespuesta(datos[1], user_answer);
         response += "El enunciado ha sido: "+datos[0]+"\nTu respuesta ha sido la *"+user_answer+"*.\n*La respuesta correcta es: "+datos[1]+"*\n\n"
         response += "Respuestas *correctas*: "+datos_score[0].toString()+".\nRespuestas *incorrectas*: "+datos_score[1].toString()+".\n\n";
         console.log("accion: "+accion);
@@ -336,19 +348,22 @@ bot.on('callback_query', (callbackQuery) => {
         response += "Para empezar o seguir el test puedes escribir el comando "+accion+".\n"
         response += "Para parar el test puedes escribir el comando "+command[12]+"."
 
-        var today = new Date().toLocaleDateString("es-ES", {  
+        let today = new Date().toLocaleDateString("es-ES", {  
             day : '2-digit',
             month : '2-digit',
             year : 'numeric'
         })
-        var hoy = funciones.formatDate(today);
-        var time = new Date().toLocaleTimeString("es-ES", {  
+        let hoy = funciones.replaceCharacters(today,"/","-");
+        //console.log(hoy);
+        let time = new Date().toLocaleTimeString("es-ES", {  
             hour: '2-digit',
-            minute:'2-digit'
+            minute:'2-digit',
+            hour12: false
         })
+        console.log(time);
 
-        var ObjectID = mongo.ObjectID;
-        let doc = { "_id": new ObjectID(), "user": msg.chat.username, "accion": accion, "bloque": preg[0], "autor": preg[1], "enunciado": datos[0], "resp_correcta": datos[1], "resp_user": data, "fecha": hoy+" "+time.toString()  };
+        let ObjectID = mongo.ObjectID;
+        let doc = { "_id": new ObjectID(), "user": msg.chat.username, "accion": accion, "bloque": preg[0], "autor": preg[1], "enunciado": datos[0], "resp_correcta": datos[1], "resp_user": data, "tipo_respuesta": tipo_respuesta, "fecha": hoy+" "+time.toString()  };
         //console.log("doc: "+ JSON.stringify(doc));
 
         bot.sendMessage(cid, response, { parse_mode: markdown }).then(() => { 

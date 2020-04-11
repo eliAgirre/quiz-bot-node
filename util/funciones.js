@@ -189,6 +189,24 @@ module.exports = {
 
     },
 
+    replaceCharacters: function(str, char1, char2){
+
+      var string = "";
+      var chart = "";
+      for(i=0; i < str.length; i++){  // fixed spelling from 'str.lenght'
+          if (str.charAt(i) == char1) {
+              chart = char2;
+              string = string + chart;
+          }
+          else {
+              chart = str.charAt(i);
+              string = string + chart;
+          }
+      }
+      return string
+
+  },
+
     getRespuestaUser: function(data){
 
       const OPCION_A = 'a'
@@ -231,6 +249,22 @@ module.exports = {
       
       return datos_score;
 
+    },
+
+    tipoRespuesta: function(resp_correcta, resp_user){
+
+      let tipo_respuesta = '';
+
+      if( resp_user != ''){
+        if( resp_user === resp_correcta ){
+          tipo_respuesta = 'correcta';
+        }
+        else if( resp_user !== resp_correcta ){
+          tipo_respuesta = 'incorrecta';
+        }
+      }
+
+      return tipo_respuesta;
     },
 
     getDatosPregunta: function(array){
