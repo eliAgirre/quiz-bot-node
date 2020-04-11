@@ -11,13 +11,7 @@ log.info("We're up and running!", {port: 3000});
 
 // constantes
 const token = process.env.TOKEN;
-//const bot = new TelegramBot(token, {polling: true});
-port = process.env.PORT || 443,
-host = '0.0.0.0',  // probably this change is not required
-externalUrl = process.env.CUSTOM_ENV_VARIABLE,
-token,
-bot = new TelegramBot(process.env.TOKEN, { webHook: { port : port, host : host } });
-bot.setWebHook(externalUrl + ':443/bot' + token);
+const bot = new TelegramBot(token, {polling: true});
 
 // database
 const clientMongo = require('./database/config.js');
@@ -353,8 +347,8 @@ bot.on('callback_query', (callbackQuery) => {
             month : '2-digit',
             year : 'numeric'
         })
-        let hoy = funciones.replaceCharacters(today,"/","-");
-        //console.log(hoy);
+        let hoy = funciones.formatDate(today)
+        console.log(hoy);
         let time = new Date().toLocaleTimeString("es-ES", {  
             hour: '2-digit',
             minute:'2-digit',
