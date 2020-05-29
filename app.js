@@ -4,6 +4,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const log = require('bristol');
 const palin = require('palin');
 const mongo = require('mongodb');
+var pdf = require('html-pdf');
 
 // log
 log.addTarget('console').withFormatter(palin);
@@ -449,6 +450,34 @@ bot.onText(/^\/wiki (.+)/, function onWikiText(msg, match) {
     } 
 });
 
+bot.onText(/^\/searches/, (msg) => {
+    //var fs = require('fs');
+    logs.logSearches(msg);
+    const nombreFichero = "searches.pdf";
+    var contenido = `<h1>Esto es un test de html-pdf</h1><p>Estoy generando PDF a partir de este código HTML sencillo</p>`;
+    pdf.create(contenido).toFile(nombreFichero, function(err, res) {
+        if (err){
+            console.log(err);
+        } else {
+            console.log(res);
+        }
+    });
+       
+    bot.sendDocument(msg.chat.id, nombreFichero, {caption: "Searches"  }).then(() => {
+        console.log(msg);
+    });
+});
+
+// Matches /photo
+bot.onText(/\/photo/, function onPhotoText(msg) {
+    // From file path
+    //const photo = `${__dirname}/kitten.jpg`;
+    const photo = "kitten.jpg";
+    bot.sendPhoto(msg.chat.id, photo, { caption: "I'm a kitten!" }).then(() => {
+        console.log(msg);
+    });
+});
+
 // command default
 bot.on('message', (msg) =>  {
     console.log("Comando default")
@@ -456,33 +485,49 @@ bot.on('message', (msg) =>  {
     log.info(log_info, { scope: 'default' });
     funciones.writeFile(file_log, log_info);
     const cid = msg.chat.id
-    response = ''
+    let response = '';
 
-    texto = msg.text.toString();
-    comando = texto.substring(0, 6);
-    comando = comando.trim().toLowerCase();
-    search = texto.substring(5, texto.length);
+    if( msg.text !== undefined){
 
-    console.log("texto: "+texto)
-    console.log("comando: "+comando)
-    console.log("search: "+search)
-    console.log("tam search: "+search.length)
-
-    if ( !funciones.findCommnad(comando) ){ // si no es ningun comando
+        texto = msg.text.toString();
+        comando = texto;
+        comando = comando.trim();
+        comando_wiki = texto.substring(0, 6);
+        comando_wiki = comando_wiki.trim().toLowerCase();
+        search = texto.substring(5, texto.length);
         
-        response = "No te entiendo \"" +texto+ "\"\nPuedes escribir el comando "+command[1]+" para saber qué comando utilizar."
-        bot.sendMessage(cid, response);
-    }
-    else{
+        console.log("texto: "+texto);
+        console.log("comando: "+comando);
+        console.log("comando wiki: "+comando_wiki);
+        console.log("search: "+search);
 
-        if ( funciones.findCommnad(comando) ){ // si es el comando wiki
+        if ( !funciones.findCommnad(comando) & !funciones.findCommnad(comando_wiki) & comando === 'https:' ){ // si no es ningun comando
 
-            if( comando === command[13] ){
-                if (search.length === 0){
-                    response = "No has puesto nada después de "+command[13]+" para buscarlo."
-                    bot.sendMessage(cid, response);
-                }
+            if ( !funciones.findAutores(texto) & !funciones.findBloques(texto) & !funciones.findYears(texto) & !funciones.findPromociones(texto) ){ // si no es ningun autor o bloque o promocion
+                response = "No te entiendo \"" +texto+ "\"\nPuedes escribir el comando "+command[1]+" para saber qué comando utilizar."
+                bot.sendMessage(cid, response);
             }
         }
+        else{
+
+            if ( funciones.findCommnad(comando_wiki) ){ // si es el comando wiki
+    
+                if( comando_wiki === command[13] ){
+                    if (search.length === 0)
+                        response = "No has puesto nada después de "+command[13]+" para buscarlo."
+                        bot.sendMessage(cid, response);
+                }
+                
+            }
+            /*
+            else{
+                response = "No existe el comando en este bot. Para ello puedes escribir /help.";
+            }*/
+        }
     }
+    else{
+        response = "Si necesita ayuda puedes escribir /help.";
+        bot.sendMessage(cid, response);
+    }
+
 });
