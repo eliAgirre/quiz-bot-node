@@ -4,7 +4,8 @@ const TelegramBot = require('node-telegram-bot-api');
 const log = require('bristol');
 const palin = require('palin');
 const mongo = require('mongodb');
-var pdf = require('html-pdf');
+const puppeteer = require("puppeteer");
+const http = require("http");
 
 // log
 log.addTarget('console').withFormatter(palin);
@@ -65,6 +66,51 @@ var accion = '';
 var bloque_anterior = '';
 var anio_anterior = '';
 var accion_anterior = '';
+
+// Create an instance of the HTTP server to handle the request.
+http
+  .createServer(async (req, res) => {
+    // Set the content type so the browser knows how to handle the response.
+    res.writeHead(200, { "Content-Type": "application/pdf" });
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto("http://localhost:8000");
+    // By removing the `path` option, we will receive a `Buffer` from `page.pdf`.
+    const buffer = await page.pdf({ format: "A4" });
+
+    await browser.close();
+
+    // We can directly serve this buffer to the browser.
+    res.end(buffer);
+  })
+  .listen(3000);
+  
+http.createServer(async (req, res) => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(`
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>HTML to PDF Example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <div id="searches">
+    <h1>Our searches</h1>
+  </div>
+</body>
+</html>
+`)
+  const buffer = await page.pdf({ format: "A4" });
+  await browser.close();
+
+    res.end(buffer);
+}
 
 // comandos
 bot.onText(/^\/start/, (msg) => {
@@ -464,10 +510,27 @@ bot.onText(/^\/searches/, (msg) => {
         }
     });
     */
+    
+    
+    
     bot.sendDocument(msg.chat.id, "searches.pdf", {caption: "Searches"  }).then(() => {
         console.log(msg);
     });
 });
+
+async function generatePDF() {
+  // Launch a new browser session.
+  const browser = await puppeteer.launch();
+  // Open a new Page.
+  const page = await browser.newPage();
+
+  // Go to our invoice page that we serve on `localhost:8000`.
+  await page.goto("http://localhost:8000");
+  // Store the PDF in a file named `invoice.pdf`.
+  await page.pdf({ path: "searches.pdf", format: "A4" });
+
+  await browser.close();
+}
 
 // Matches /photo
 bot.onText(/\/photo/, function onPhotoText(msg) {
